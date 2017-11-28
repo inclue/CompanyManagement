@@ -13,7 +13,7 @@ namespace CompanyManagement
 {
     public partial class Form1 : Form
     {
-        private string connectionString = "Data Source=127.0.0.1,14331;Database=Test;Integrated Security=SSPI;";
+        private string connectionString = "Data Source=127.0.0.1;Database=Test;Integrated Security=SSPI;";
         List<Company> companyDataList;
         List<Worker> workerDataList;
         List<WorkerData> workerDataViewList;
