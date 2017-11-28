@@ -14,9 +14,10 @@ namespace CompanyManagement
     public partial class Form1 : Form
     {
         private string connectionString = "Data Source=127.0.0.1,14331;Database=Test;Integrated Security=SSPI;";
-        ArrayList companyDataList, workerDataList; //Company, Worker 클래스
-        ArrayList workerDataViewList; //WorkerData 클래스
-        ArrayList companyCheckList, workerCheckList; //int(index)
+        List<Company> companyDataList;
+        List<Worker> workerDataList;
+        List<WorkerData> workerDataViewList;
+        List<int> companyCheckList, workerCheckList; //index
         bool change = true;
 
         public Form1() { InitializeComponent(); }
@@ -25,8 +26,8 @@ namespace CompanyManagement
         private void Form1_Load(object sender, EventArgs e)
         {
             //초기화
-            companyDataList = new ArrayList();
-            workerDataList = new ArrayList();
+            companyDataList = new List<Company>();
+            workerDataList = new List<Worker>();
 
             dataGridViewCompany.Columns["ColumnNameCompany"].SortMode = DataGridViewColumnSortMode.NotSortable;
             dataGridViewCompany.Columns["ColumnPhoneCompany"].SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -64,7 +65,7 @@ namespace CompanyManagement
             //DataGridView 세팅
             dataGridViewCompany.Rows.Clear();
             for (int i = 0; i < companyDataList.Count; i++)
-                dataGridViewCompany.Rows.Add(new string[] { ((Company)companyDataList[i]).name, ((Company)companyDataList[i]).phone, ((Company)companyDataList[i]).address });
+                dataGridViewCompany.Rows.Add(new string[] { companyDataList[i].name, companyDataList[i].phone, companyDataList[i].address });
 
             textCompanyName.Text = ""; textCompanyPhone.Text = ""; textCompanyAddress.Text = "";
             WorkerUpdateData();
@@ -74,7 +75,7 @@ namespace CompanyManagement
         //dataGridViewCompany의 선택된 셀 체크
         private void selectedCheckCompany()
         {
-            companyCheckList = new ArrayList();
+            companyCheckList = new List<int>();
             for (int i = 0; i < dataGridViewCompany.RowCount; i++)
             {
                 bool flag=false;
@@ -109,8 +110,8 @@ namespace CompanyManagement
                 }
             }
             companyDataList.Add(new Company(textCompanyName.Text,textCompanyPhone.Text,textCompanyAddress.Text));
-            dataGridViewCompany.Rows.Add(new string[]{ ((Company)companyDataList[companyDataList.Count - 1]).name,
-                ((Company)companyDataList[companyDataList.Count - 1]).phone, ((Company)companyDataList[companyDataList.Count - 1]).address });
+            dataGridViewCompany.Rows.Add(new string[]{ companyDataList[companyDataList.Count - 1].name,
+                companyDataList[companyDataList.Count - 1].phone, companyDataList[companyDataList.Count - 1].address });
             textCompanyName.Text = ""; textCompanyPhone.Text = ""; textCompanyAddress.Text = "";
             change = true;
         }
@@ -138,23 +139,23 @@ namespace CompanyManagement
             {
                 for (int i = 0; i < companyDataList.Count; i++)
                 {
-                    if (((Company)companyDataList[i]).name == textCompanyName.Text)
+                    if (companyDataList[i].name == textCompanyName.Text)
                     {
                         MessageBox.Show("중복되는 회사명이 있습니다.", "입력 안내", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
-                ((Company)companyDataList[checkIndex]).name = textCompanyName.Text;
+                companyDataList[checkIndex].name = textCompanyName.Text;
                 for (int i = 0; i < workerDataList.Count; i++)
                 {
-                    if (((Worker)workerDataList[i]).company == ((Company)companyDataList[checkIndex]).name) ((Worker)workerDataList[i]).company = textCompanyName.Text;
+                    if (workerDataList[i].company == companyDataList[checkIndex].name) workerDataList[i].company = textCompanyName.Text;
                 }
-                ((Company)companyDataList[checkIndex]).name = textCompanyName.Text;
+                companyDataList[checkIndex].name = textCompanyName.Text;
             }
-            if (textCompanyPhone.Text != "") ((Company)companyDataList[checkIndex]).phone = textCompanyPhone.Text;
-            if (textCompanyAddress.Text != "") ((Company)companyDataList[checkIndex]).address = textCompanyAddress.Text;
-            dataGridViewCompany.Rows[checkIndex].SetValues(new Object[]{ ((Company)companyDataList[checkIndex]).name, 
-                ((Company)companyDataList[checkIndex]).phone, ((Company)companyDataList[checkIndex]).address });
+            if (textCompanyPhone.Text != "") companyDataList[checkIndex].phone = textCompanyPhone.Text;
+            if (textCompanyAddress.Text != "") companyDataList[checkIndex].address = textCompanyAddress.Text;
+            dataGridViewCompany.Rows[checkIndex].SetValues(new Object[]{ companyDataList[checkIndex].name, 
+                companyDataList[checkIndex].phone, companyDataList[checkIndex].address });
             textCompanyName.Text = ""; textCompanyPhone.Text = ""; textCompanyAddress.Text = "";
             change = true;
         }
@@ -169,7 +170,7 @@ namespace CompanyManagement
             }
 
             string messageName = "";
-            foreach (int i in companyCheckList) messageName += ((Company)companyDataList[i]).name + " ";
+            foreach (int i in companyCheckList) messageName += companyDataList[i].name + " ";
 
             if (MessageBox.Show(messageName + "의 데이터를 삭제하시겠습니까?\n해당 회사의 사원들도 같이 삭제됩니다.", "삭제 안내",
                 MessageBoxButtons.OKCancel) == DialogResult.OK)
@@ -178,7 +179,7 @@ namespace CompanyManagement
                 {
                     for (int j = 0; j < companyCheckList.Count; j++)
                     {
-                        if (((Worker)workerDataList[i]).company == ((Company)companyDataList[(int)companyCheckList[j]]).name)
+                        if (workerDataList[i].company == companyDataList[companyCheckList[j]].name)
                         {
                             workerDataList.RemoveAt(i--);
                             break;
@@ -186,11 +187,11 @@ namespace CompanyManagement
                     }
                 }
 
-                ArrayList tempList = companyCheckList;
+                List<int> tempList = companyCheckList;
                 while (tempList.Count > 0)
                 {
-                    companyDataList.RemoveAt((int)companyCheckList[0]);
-                    dataGridViewCompany.Rows.RemoveAt((int)companyCheckList[0]);
+                    companyDataList.RemoveAt(companyCheckList[0]);
+                    dataGridViewCompany.Rows.RemoveAt(companyCheckList[0]);
                     tempList.RemoveAt(0);
                 }
                 selectedCheckCompany();
@@ -206,13 +207,13 @@ namespace CompanyManagement
         private void WorkerUpdateData()
         {
             dataGridViewWorker.Rows.Clear();
-            workerDataViewList = new ArrayList();
+            workerDataViewList = new List<WorkerData>();
             for (int i = 0; i < workerDataList.Count; i++)
             {
                 bool flag = false;
                 for (int j = 0; j < companyCheckList.Count; j++)
                 {
-                    if (((Worker)workerDataList[i]).company == ((Company)companyDataList[(int)companyCheckList[j]]).name)
+                    if (workerDataList[i].company == companyDataList[companyCheckList[j]].name)
                     {
                         flag = true;
                         break;
@@ -220,8 +221,8 @@ namespace CompanyManagement
                 }
                 if (flag)
                 {
-                    workerDataViewList.Add(new WorkerData(i + 1, ((Worker)workerDataList[i]).name, ((Worker)workerDataList[i]).phone, ((Worker)workerDataList[i]).address));
-                    dataGridViewWorker.Rows.Add(new string[]{ ((Worker)workerDataList[i]).name, ((Worker)workerDataList[i]).phone, ((Worker)workerDataList[i]).address });
+                    workerDataViewList.Add(new WorkerData(i + 1, workerDataList[i].name, workerDataList[i].phone, workerDataList[i].address));
+                    dataGridViewWorker.Rows.Add(new string[]{ workerDataList[i].name, workerDataList[i].phone, workerDataList[i].address });
                 }
             }
             textWorkerName.Text = ""; textWorkerPhone.Text = ""; textWorkerAddress.Text = "";
@@ -231,7 +232,7 @@ namespace CompanyManagement
         //dataGridViewWorker의 선택된 셀 체크
         private void selectedCheckWorker()
         {
-            workerCheckList = new ArrayList();
+            workerCheckList = new List<int>();
             for (int i = 0; i < dataGridViewWorker.RowCount; i++)
             {
                 bool flag = false;
@@ -263,11 +264,10 @@ namespace CompanyManagement
                     return;
                 }
             }
-            if (MessageBox.Show("회사는 " + ((Company)companyDataList[(int)companyCheckList[0]]).name + "로 추가됩니다.", "입력 안내",
-                MessageBoxButtons.OKCancel) == DialogResult.OK)
+            if (MessageBox.Show("회사는 " + companyDataList[companyCheckList[0]].name + "로 추가됩니다.", "입력 안내", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
 
-                workerDataList.Add(new Worker(textWorkerName.Text, textWorkerPhone.Text, textWorkerAddress.Text, ((Company)companyDataList[(int)companyCheckList[0]]).name));
+                workerDataList.Add(new Worker(textWorkerName.Text, textWorkerPhone.Text, textWorkerAddress.Text, companyDataList[companyCheckList[0]].name));
                 workerDataViewList.Add(new WorkerData(workerDataList.Count - 1, textWorkerName.Text, textWorkerPhone.Text, textWorkerAddress.Text));
                 dataGridViewWorker.Rows.Add(new string[] { textWorkerName.Text, textWorkerPhone.Text, textWorkerAddress.Text });
                 textWorkerName.Text = ""; textWorkerPhone.Text = ""; textWorkerAddress.Text = "";
@@ -294,24 +294,23 @@ namespace CompanyManagement
                 return;
             }
             int checkIndex = (int)workerCheckList[0];
-            int id = ((WorkerData)workerDataViewList[checkIndex]).id;
+            int id = workerDataViewList[checkIndex].id;
             if (textWorkerName.Text != "")
             {
-                ((WorkerData)workerDataViewList[checkIndex]).name = textWorkerName.Text;
-                ((Worker)workerDataList[id - 1]).name = textWorkerName.Text;
+                workerDataViewList[checkIndex].name = textWorkerName.Text;
+                workerDataList[id - 1].name = textWorkerName.Text;
             }
             if (textWorkerPhone.Text != "")
             {
-                ((WorkerData)workerDataViewList[checkIndex]).phone = textWorkerPhone.Text;
-                ((Worker)workerDataList[id - 1]).phone = textWorkerPhone.Text;
+                workerDataViewList[checkIndex].phone = textWorkerPhone.Text;
+                workerDataList[id - 1].phone = textWorkerPhone.Text;
             }
             if (textWorkerAddress.Text != "")
             {
-                ((WorkerData)workerDataViewList[checkIndex]).address = textWorkerAddress.Text;
-                ((Worker)workerDataList[id - 1]).address = textWorkerAddress.Text;
+                workerDataViewList[checkIndex].address = textWorkerAddress.Text;
+                workerDataList[id - 1].address = textWorkerAddress.Text;
             }
-            dataGridViewWorker.Rows[checkIndex].SetValues(new Object[]{ ((Worker)workerDataList[id-1]).name,
-                ((Worker)workerDataList[id-1]).phone, ((Worker)workerDataList[id-1]).address });
+            dataGridViewWorker.Rows[checkIndex].SetValues(new Object[]{ workerDataList[id-1].name, workerDataList[id-1].phone, workerDataList[id-1].address });
             textWorkerName.Text = ""; textWorkerPhone.Text = ""; textWorkerAddress.Text = "";
             change = true;
         }
@@ -326,18 +325,18 @@ namespace CompanyManagement
             }
 
             string messageName = "";
-            foreach (int i in workerCheckList) messageName += ((WorkerData)workerDataViewList[i]).name + " ";
+            foreach (int i in workerCheckList) messageName += workerDataViewList[i].name + " ";
 
             if (MessageBox.Show(messageName + "님의 데이터를 삭제하시겠습니까?", "삭제 안내",
                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 int i = 0;
-                ArrayList tempList = workerCheckList;
+                List<int> tempList = workerCheckList;
                 while (tempList.Count > 0)
                 {
                     i++;
                     int index = (int)workerCheckList[0];
-                    workerDataList.RemoveAt(((WorkerData)workerDataViewList[index]).id - i);
+                    workerDataList.RemoveAt(workerDataViewList[index].id - i);
                     workerDataViewList.RemoveAt(index);
                     dataGridViewWorker.Rows.RemoveAt(index);
                     tempList.RemoveAt(0);
@@ -366,9 +365,9 @@ namespace CompanyManagement
                 {
                     command = new SqlCommand(
                         "INSERT INTO Table_Company VALUES(@Name, @Phone, @Address);", connection);
-                    command.Parameters.AddWithValue("Name", ((Company)companyDataList[i]).name);
-                    command.Parameters.AddWithValue("Phone", ((Company)companyDataList[i]).phone);
-                    command.Parameters.AddWithValue("Address", ((Company)companyDataList[i]).address);
+                    command.Parameters.AddWithValue("Name", companyDataList[i].name);
+                    command.Parameters.AddWithValue("Phone", companyDataList[i].phone);
+                    command.Parameters.AddWithValue("Address", companyDataList[i].address);
                     command.ExecuteNonQuery();
                 }
 
@@ -377,10 +376,10 @@ namespace CompanyManagement
                     command = new SqlCommand(
                         "INSERT INTO Table_Worker VALUES(@ID ,@Name, @Phone, @Address, @Company);", connection);
                     command.Parameters.AddWithValue("ID", i + 1);
-                    command.Parameters.AddWithValue("Name", ((Worker)workerDataList[i]).name);
-                    command.Parameters.AddWithValue("Phone", ((Worker)workerDataList[i]).phone);
-                    command.Parameters.AddWithValue("Address", ((Worker)workerDataList[i]).address);
-                    command.Parameters.AddWithValue("Company", ((Worker)workerDataList[i]).company);
+                    command.Parameters.AddWithValue("Name", workerDataList[i].name);
+                    command.Parameters.AddWithValue("Phone", workerDataList[i].phone);
+                    command.Parameters.AddWithValue("Address", workerDataList[i].address);
+                    command.Parameters.AddWithValue("Company", workerDataList[i].company);
                     command.ExecuteNonQuery();
                 }
 
